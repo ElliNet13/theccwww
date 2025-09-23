@@ -1,0 +1,6 @@
+print("Oh no!")
+print("The page you were looking for could not be found.")
+print("Make sure your URL is correct.")
+print("Going to the homepage in 5s...")
+os.sleep(5)
+theccwww.gotopage("")
