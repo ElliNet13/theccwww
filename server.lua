@@ -63,9 +63,4 @@ local function serverLoop()
     end
 end
 
-local function errorHandler(err)
-    rednet.unhost("theccwww")
-    return err       -- rethrow the original error
-end
-
-xpcall(serverLoop, errorHandler)
+serverLoop()
