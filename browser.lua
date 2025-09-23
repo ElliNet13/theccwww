@@ -140,11 +140,20 @@ end
 -- Require a link
 function theccwww.require(domain, path)
     local fileserver = rednet.lookup("theccwww", domain)
-    local gotSent = rednet.send(fileserver, path, "theccwww")
-    if not gotSent then
-        error("Failed to send message to " .. domain)
+    if not fileserver then
+        error("No fileserver found for " .. domain)
     end
-    local id, message = rednet.receive("theccwww")
+
+    -- Send a request to the server
+    rednet.send(fileserver, path, "theccwww")
+
+    -- Wait for a response, but with a timeout to prevent hanging forever
+    local id, message = rednet.receive("theccwww", 5) -- 5-second timeout
+    if not message then
+        error("Timed out waiting for file from " .. domain .. "/" .. path)
+    end
+
+    -- Load the file in your sandbox
     return load(message, "Website require", "t", sandbox)()
 end
 
@@ -177,8 +186,12 @@ sandbox = {
     },
     xpcall = xpcall,
     pcall = pcall,
-    require = function (path) -- A mini version for compatibility with built in require
-        return theccwww.require(theccwww.link.domain, path)
+    require = function (path) -- A version for compatibility with built in require
+        if path:match("^cc%.") then
+            return require(path)
+        else
+            return theccwww.require(theccwww.link.domain, path)
+        end
     end
 }
 
