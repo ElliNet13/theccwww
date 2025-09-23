@@ -27,6 +27,14 @@ for _, file in ipairs(fs.list(sourceFiles)) do
     fs.copy(sourceFiles .. "/" .. file, destination .. "/" .. file)
 end
 
+-- Delete the files directory if it is empty
+local filesPath = "/theccwww/files"
+if fs.exists(filesPath) and fs.isDir(filesPath) then
+    if #fs.list(filesPath) == 0 then
+        fs.delete(filesPath)
+    end
+end
+
 print("Setup finished!")
 print("Installed to " .. destination)
 print("To access websites, run the browser.lua script in the " .. destination .. " directory.")
