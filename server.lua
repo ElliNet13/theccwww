@@ -35,12 +35,19 @@ local function serverLoop()
             print("Sending index to " .. id)
             message = "index"
         end
-        if fs.exists(dir .. "/files/" .. message .. ".lua") == false then
+        if fs.exists(dir .. "/files/" .. message ) then
+            -- No more changes to the message is needed, it is just a file
+            print("Sending file" .. message .. " to " .. id)
+        elseif fs.exists(dir .. "/files/" .. message .. ".lua") then
+            -- It's a page
+            print("Sending page" .. message .. " to " .. id)
+            message = message .. ".lua"
+        else
+            -- It's a 404
             print("Sending 404 to " .. id .. " because " .. message .. " does not exist")
             message = "404"
         end
-        print("Sending " .. message .. " to " .. id)
-        local file = fs.open(dir .. "/files/" .. message .. ".lua", "r")
+        local file = fs.open(dir .. "/files/" .. message, "r")
         local content = file.readAll()
         file.close()
         rednet.send(id, content, "theccwww")

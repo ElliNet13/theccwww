@@ -93,6 +93,61 @@ function theccwww.gotosite(site, page)
     theccwww.gotopage(page or "")
 end
 
+-- Function to prompt yes/no 
+function theccwww.promptYesNo(question)
+    while true do
+        write(question .. " (y/n): ")
+        local answer = read()
+        if answer then
+            answer = answer:lower()
+            if answer == "y" or answer == "yes" then
+                return true
+            elseif answer == "n" or answer == "no" then
+                return false
+            else
+                print("Please enter 'y' or 'n'.")
+            end
+        end
+    end
+end
+
+-- Save a file
+function theccwww.save(domain, path)
+    print()
+    print("Requested to save: " .. domain .. "/" .. path)
+
+    if theccwww.promptYesNo("Are you sure you want to save this file?") then
+        print("Where do you want to save it?")
+        local file = fs.open(read(), "w")
+        local fileserver = rednet.lookup("theccwww", domain)
+        local gotSent = rednet.send(fileserver, path, "theccwww")
+        if not gotSent then
+            error("Failed to send message to " .. domain)
+        end
+        print("Receiving file...")
+        local id, message = rednet.receive("theccwww")
+        print("Saving file...")
+        file.write(message)
+        file.close()
+        print("File saved.")
+        os.sleep(1)
+    else
+        print("Save canceled.")
+        os.sleep(1)
+    end
+end
+
+-- Require a link
+function theccwww.require(domain, path)
+    local fileserver = rednet.lookup("theccwww", domain)
+    local gotSent = rednet.send(fileserver, path, "theccwww")
+    if not gotSent then
+        error("Failed to send message to " .. domain)
+    end
+    local id, message = rednet.receive("theccwww")
+    return load(message, "Website require", "t", sandbox)()
+end
+
 -- Create a sandbox
 sandbox = {
     print = print,

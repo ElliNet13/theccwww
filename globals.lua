@@ -27,3 +27,21 @@ theccwww.link.page = nil
 ---@type string
 ---@const
 theccwww.link.domain = nil
+
+---Sends you to another page on the site
+---@param domain string The domain that hosts the file
+---@param path string The path to the file on the domain
+function theccwww.save(domain, path) end
+
+---Function to prompt yes/no 
+---@param question string
+---@return boolean
+---@diagnostic disable-next-line: missing-return
+function theccwww.promptYesNo(question) end
+
+---Require a link 
+---@param domain string The domain that hosts the file
+---@param path string The path to the lua file on the domain
+---@return any
+---@diagnostic disable-next-line: missing-return
+function theccwww.require(domain, path) end
