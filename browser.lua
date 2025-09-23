@@ -108,36 +108,28 @@ function theccwww.promptYesNo(question)
     end
 end
 
--- Save a file
-function theccwww.save(domain, path)
-    print()
-    print("Requested to save: " .. domain .. "/" .. path)
-
-    if theccwww.promptYesNo("Are you sure you want to save this file?") then
-        print("Where do you want to save it?")
-        local file = fs.open(read(), "w")
-        local fileserver = rednet.lookup("theccwww", domain)
-        local gotSent = rednet.send(fileserver, path, "theccwww")
-        if not gotSent then
-            error("Failed to send message to " .. domain)
-        end
-        print("Receiving file...")
-        local id, message = rednet.receive("theccwww")
-        print("Saving file...")
-        file.write(message)
-        file.close()
-        print("File saved.")
-        os.sleep(1)
-    else
-        print("Save canceled.")
-        os.sleep(1)
+-- Get the contents of a file on a fileserver
+function theccwww.download(domain, path)
+    local fileserver = rednet.lookup("theccwww", domain)
+    if not fileserver then
+        error("No fileserver found for " .. domain)
     end
+
+    -- Send a request to the server
+    local gotSent = rednet.send(fileserver, path, "theccwww", 5)
+
+    if not gotSent then
+        error("Failed to send message to " .. domain)
+    end
+
+    local id, message = rednet.receive("theccwww")
+    return message
 end
 
 -- Upload a file
-function theccwww.upload(mode)
+function theccwww.file(mode)
     print()
-    print("The website requested to upload a file")
+    print("The website requested to access a file")
     print("Wants to: " ..
     (mode == "r" and "read" or
      mode == "w" and "write" or

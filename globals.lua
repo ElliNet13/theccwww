@@ -28,11 +28,6 @@ theccwww.link.page = nil
 ---@const
 theccwww.link.domain = nil
 
----Sends you to another page on the site
----@param domain string The domain that hosts the file
----@param path string The path to the file on the domain
-function theccwww.save(domain, path) end
-
 ---Function to prompt yes/no 
 ---@param question string
 ---@return boolean
@@ -55,4 +50,4 @@ theccwww.speakers = nil
 ---@param mode string The mode to open the file in
 ---@return file* | nil
 ---@diagnostic disable-next-line: missing-return
-function theccwww.upload(mode) end
+function theccwww.file(mode) end
