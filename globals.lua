@@ -50,3 +50,9 @@ function theccwww.require(domain, path) end
 ---@type table
 ---@const
 theccwww.speakers = nil
+
+---Function to get a file handle, will be nil if the upload is canceled.
+---@param mode string The mode to open the file in
+---@return file* | nil
+---@diagnostic disable-next-line: missing-return
+function theccwww.upload(mode) end

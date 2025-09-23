@@ -134,6 +134,29 @@ function theccwww.save(domain, path)
     end
 end
 
+-- Upload a file
+function theccwww.upload(mode)
+    print()
+    print("The website requested to upload a file")
+    print("Wants to: " ..
+    (mode == "r" and "read" or
+     mode == "w" and "write" or
+     mode == "a" and "append to" or
+     mode == "x" and "create" or
+     "unknown mode (" .. mode .. ")") .. " a file")
+
+    if theccwww.promptYesNo("Are you sure you want to use this file?") then
+        print("Where is the file?")
+        local file = fs.open(read(), mode)
+        return file
+    else
+        print("Upload canceled.")
+        os.sleep(1)
+        return nil
+    end
+    
+end
+
 -- Require a link
 function theccwww.require(domain, path)
     local fileserver = rednet.lookup("theccwww", domain)
