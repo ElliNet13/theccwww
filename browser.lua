@@ -174,7 +174,9 @@ sandbox = {
         date = os.date,
         pullEvent = os.pullEvent,
         sleep = os.sleep
-    }
+    },
+    xpcall = xpcall,
+    pcall = pcall,
 }
 
 -- Go to the home page
