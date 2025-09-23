@@ -6,6 +6,7 @@ peripheral.find("modem", rednet.open)
 
 -- Load config
 local dir = fs.getDir(shell.getRunningProgram())
+local files = fs.combine(dir, "files")
 
 if not fs.exists(dir .. "/config.yaml") then
     fs.copy(dir .. "/server.default.yaml", dir .. "/config.yaml")
@@ -17,12 +18,13 @@ file.close()
 local hostname = config.hostname
 
 print("Starting server as " .. hostname)
+print("Files: " .. files)
 
 -- Check if files exist
-if not fs.exists(dir .. "/files") then
-    fs.makeDir(dir .. "/files")
-    fs.copy(dir .. "/index.default.lua", dir .. "/files/index.lua")
-    fs.copy(dir .. "/404.default.lua", dir .. "/files/404.lua")
+if not fs.exists(files) then
+    fs.makeDir(files)
+    fs.copy(dir .. "/index.default.lua", fs.combine(files, "index.lua"))
+    fs.copy(dir .. "/404.default.lua", fs.combine(files, "404.lua"))
 end
 
 -- Start hosting
@@ -47,11 +49,17 @@ local function serverLoop()
             print("Sending 404 to " .. id .. " because " .. message .. " does not exist")
             message = "404"
         end
-        local file = fs.open(dir .. "/files/" .. message, "r")
+        local path = fs.combine(files, message)
+        print("Sending final path " .. path .. " to " .. id)
+        if not string.find(path, files .. "/") then
+            print("[CANCELED] Computer " .. id .. " requested file " .. message .. " outside of " .. files .. " directory")
+            path = fs.combine(files, "404")
+        end
+        local file = fs.open(path, "r")
         local content = file.readAll()
         file.close()
         rednet.send(id, content, "theccwww")
-        print("Sent " .. message .. " to " .. id)
+        print("[DONE] Sent " .. path .. " to " .. id)
     end
 end
 
