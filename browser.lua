@@ -213,6 +213,7 @@ sandbox = {
     end,
     colors = colors,
     colours = colours,
+    load = load,
 }
 
 -- Go to the home page
