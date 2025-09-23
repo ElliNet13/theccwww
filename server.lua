@@ -37,10 +37,10 @@ local function serverLoop()
         end
         if fs.exists(dir .. "/files/" .. message ) then
             -- No more changes to the message is needed, it is just a file
-            print("Sending file" .. message .. " to " .. id)
+            print("Sending file " .. message .. " to " .. id)
         elseif fs.exists(dir .. "/files/" .. message .. ".lua") then
             -- It's a page
-            print("Sending page" .. message .. " to " .. id)
+            print("Sending page " .. message .. " to " .. id)
             message = message .. ".lua"
         else
             -- It's a 404
