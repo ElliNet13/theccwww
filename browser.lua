@@ -192,7 +192,9 @@ sandbox = {
         else
             return theccwww.require(theccwww.link.domain, path)
         end
-    end
+    end,
+    colors = colors,
+    colours = colours,
 }
 
 -- Go to the home page

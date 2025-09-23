@@ -51,6 +51,7 @@ local function serverLoop()
         local content = file.readAll()
         file.close()
         rednet.send(id, content, "theccwww")
+        print("Sent " .. message .. " to " .. id)
     end
 end
 
