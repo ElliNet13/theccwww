@@ -157,6 +157,9 @@ function theccwww.require(domain, path)
     return load(message, "Website require", "t", sandbox)()
 end
 
+-- Speakers
+theccwww.speakers = { peripheral.find("speaker") }
+
 -- Create a sandbox
 sandbox = {
     print = print,

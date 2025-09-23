@@ -13,17 +13,17 @@ function theccwww.gotosite(site, page) end
 function theccwww.gotopage(page) end
 
 
--- The full link you are at
+---The full link you are at
 ---@type string
 ---@const
 theccwww.link.fulllink = nil
 
--- The page you are at
+---The page you are at
 ---@type string
 ---@const
 theccwww.link.page = nil
 
--- The domain you are at
+---The domain you are at
 ---@type string
 ---@const
 theccwww.link.domain = nil
@@ -45,3 +45,8 @@ function theccwww.promptYesNo(question) end
 ---@return any
 ---@diagnostic disable-next-line: missing-return
 function theccwww.require(domain, path) end
+
+---The domain you are at
+---@type table
+---@const
+theccwww.speakers = nil
