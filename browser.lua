@@ -1,8 +1,11 @@
 -- Start modems
 peripheral.find("modem", rednet.open)
 
-print("Enter the link to go to: ")
-local destination = read()
+local destination = ...
+if not destination then
+    print("Enter the link to go to: ")
+    destination = read()
+end
 
 -- Look up the destination
 local domain, path = destination:match("^([^/]+)(/?.*)$")
