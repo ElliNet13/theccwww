@@ -10,14 +10,21 @@ if answer ~= "y" then
     return
 end
 
+-- If the destination exists, only delete things that are NOT config.yaml or files/
 if fs.exists(destination) then
-    fs.delete(destination)
+    for _, item in ipairs(fs.list(destination)) do
+        if item ~= "config.yaml" and item ~= "files" then
+            fs.delete(destination .. "/" .. item)
+        end
+    end
+else
+    fs.makeDir(destination)
 end
 
-fs.makeDir(destination)
-
-for _, file in ipairs(fs.list(fs.getDir(shell.getRunningProgram()) .. "/files")) do
-    fs.copy(fs.getDir(shell.getRunningProgram()) .. "/files/" .. file, destination.."/"..file)
+-- Copy the new files into the destination
+local sourceFiles = fs.getDir(shell.getRunningProgram()) .. "/files"
+for _, file in ipairs(fs.list(sourceFiles)) do
+    fs.copy(sourceFiles .. "/" .. file, destination .. "/" .. file)
 end
 
 print("Setup finished!")
