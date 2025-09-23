@@ -26,6 +26,8 @@ local prodFiles = {
     "server.lua",
     "tinyyaml.lua",
     "server.default.yaml",
+    "404.default.lua",
+    "index.default.lua",
     "globals.lua"
 }
 
