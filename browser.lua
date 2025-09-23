@@ -177,6 +177,9 @@ sandbox = {
     },
     xpcall = xpcall,
     pcall = pcall,
+    require = function (path) -- A mini version for compatibility with built in require
+        return theccwww.require(theccwww.link.domain, path)
+    end
 }
 
 -- Go to the home page
