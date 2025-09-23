@@ -62,9 +62,6 @@ function theccwww.gotopage(page)
     term.clear()
     term.setCursorPos(1, 1)
     load(message, "Website", "t", sandbox)()
-    print()
-    term.setCursorPos(1, y)
-    print("Site done (Execution finished): " .. theccwww.link.fulllink)
 end
 
 -- Goto a site
