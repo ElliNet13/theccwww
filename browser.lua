@@ -192,7 +192,8 @@ sandbox = {
     term = term,
     rednet = {
         receive = rednet.receive,
-        send = rednet.send
+        send = rednet.send,
+        lookup = rednet.lookup
     },
     read = read,
     os = {
