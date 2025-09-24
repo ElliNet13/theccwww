@@ -34,10 +34,9 @@ local sandbox = {}
 
 -- Goto a page
 function theccwww.gotopage(page)
-    local x, y = term.getSize()
     print("Changing page to " .. (page or ("The homepage of" .. theccwww.link.domain)))
     theccwww.link.page = page or ""
-    theccwww.link.fulllink = theccwww.link.domain .. "/" .. theccwww.link.page
+    theccwww.link.fulllink = theccwww.link.domain .. "/" .. theccwww.link.page:gsub("^/", "")
 
     print("Sending message to " .. theccwww.link.domain)
     local gotSent = rednet.send(server, page or "", "theccwww")
@@ -72,7 +71,7 @@ function theccwww.gotosite(site, page)
     print("Changing site to " .. site)
 
     theccwww.link.domain = site
-    theccwww.link.fulllink = site .. (site:sub(-1) == "/" and "" or "/") .. (page or "")
+    theccwww.link.fulllink = site .. "/" .. (page or "")
 
     print("Looking up server for " .. site)
     -- Lookup server first
