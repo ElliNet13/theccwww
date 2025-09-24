@@ -72,7 +72,7 @@ function theccwww.gotosite(site, page)
     print("Changing site to " .. site)
 
     theccwww.link.domain = site
-    theccwww.link.fulllink = site .. "/" .. (page or "")
+    theccwww.link.fulllink = site .. (site:sub(-1) == "/" and "" or "/") .. (page or "")
 
     print("Looking up server for " .. site)
     -- Lookup server first
