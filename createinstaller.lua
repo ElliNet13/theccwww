@@ -19,7 +19,7 @@ for _, file in ipairs(fs.list(destination)) do
     fs.delete(fs.combine(destination, file))
 end
 
-fs.makeDir(destination.."/files")
+fs.makeDir(fs.combine(destination, "files"))
 
 local prodFiles = {
     "browser.lua",
