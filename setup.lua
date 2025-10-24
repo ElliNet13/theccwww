@@ -14,7 +14,7 @@ end
 if fs.exists(destination) then
     for _, item in ipairs(fs.list(destination)) do
         if item ~= "config.yaml" and item ~= "files" then
-            fs.delete(destination .. "/" .. item)
+            fs.delete(fs.combine(destination, item))
         end
     end
 else
@@ -22,9 +22,9 @@ else
 end
 
 -- Copy the new files into the destination
-local sourceFiles = fs.getDir(shell.getRunningProgram()) .. "/files"
+local sourceFiles = fs.combine(fs.getDir(shell.getRunningProgram()), "files")
 for _, file in ipairs(fs.list(sourceFiles)) do
-    fs.copy(sourceFiles .. "/" .. file, destination .. "/" .. file)
+    fs.copy(fs.combine(sourceFiles, file), fs.combine(destination, file))
 end
 
 -- Delete the files directory if it is empty

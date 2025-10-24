@@ -16,7 +16,7 @@ if answer ~= "y" then
 end
 
 for _, file in ipairs(fs.list(destination)) do
-    fs.delete(destination.."/"..file)
+    fs.delete(fs.combine(destination, file))
 end
 
 fs.makeDir(destination.."/files")
@@ -32,7 +32,7 @@ local prodFiles = {
 }
 
 for _, file in ipairs(prodFiles) do
-    fs.copy(fs.getDir(shell.getRunningProgram()) .. "/" .. file, destination.."/files/"..file)
+    fs.copy(fs.combine(fs.getDir(shell.getRunningProgram()), file), fs.combine(fs.combine(destination, "files"), file))
 end
 
 fs.copy(fs.getDir(shell.getRunningProgram()) .. "/setup.lua", destination.."/setup.lua")
