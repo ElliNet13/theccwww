@@ -28,7 +28,8 @@ local prodFiles = {
     "server.default.yaml",
     "404.default.lua",
     "index.default.lua",
-    "globals.lua"
+    "globals.lua",
+    "update.lua"
 }
 
 for _, file in ipairs(prodFiles) do

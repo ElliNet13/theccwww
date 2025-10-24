@@ -14,3 +14,4 @@ Features:
 - Browser so you can visit other websites
 - Browser uses a sandboxed lua environment
 - Supports domain names
+- Update from floppy disk or HTTP
