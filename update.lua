@@ -6,6 +6,8 @@ if answer ~= "y" then
     return
 end
 
+local startingDir = shell.getDir()
+
 -- Normalizes a path
 local function normalizePath(path)
     if string.sub(path, 1, 1) ~= "/" then
@@ -17,7 +19,8 @@ local function normalizePath(path)
     return path
 end
 
-local CCArchive = "."
+local programDir = normalizePath(fs.getDir(shell.getRunningProgram()))
+local CCArchive = programDir
 print("[Updater] Starting HTTP update...")
 local tempDir = "/tmptheccwwwhttpupdate" .. math.random(10000, 99999)
 fs.makeDir(tempDir)
@@ -57,3 +60,4 @@ shell.run("setup.lua")
 print("[Updater] Cleaning up...")
 shell.setDir("/")
 fs.delete(tempDir)
+shell.setDir(startingDir)
