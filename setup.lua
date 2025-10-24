@@ -1,5 +1,5 @@
 print("Welcome to the The Computercraft World Wide Web setup script!")
-print("This script will install the The Computer program.")
+print("This script will install the program.")
 print("Are you sure you want to continue? (y/n)")
 local answer = read()
 
