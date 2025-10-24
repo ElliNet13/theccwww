@@ -4,8 +4,10 @@ The Computercraft World Wide Web is a web browser for Computercraft.
 
 It allows you to make a website using Lua scripts.
 
-To access websites, run the browser.lua script.
-To host your own website, run the server.lua script.
+To access websites, run the `browser.lua` script.
+To host your own website, run the `server.lua` script.
+
+To create a installer for disk drives, run the `createinstaller.lua` script.
 
 Features:
 - Server so anyone can make a website
