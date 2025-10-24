@@ -6,7 +6,7 @@ if answer ~= "y" then
     return
 end
 
-local startingDir = shell.getDir()
+local startingDir = shell.dir()
 
 -- Normalizes a path
 local function normalizePath(path)

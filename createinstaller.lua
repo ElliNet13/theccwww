@@ -29,7 +29,9 @@ local prodFiles = {
     "404.default.lua",
     "index.default.lua",
     "globals.lua",
-    "update.lua"
+    "update.lua",
+    "tar.lua",
+    "LibDeflate.lua"
 }
 
 for _, file in ipairs(prodFiles) do
