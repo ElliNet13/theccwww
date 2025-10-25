@@ -1,1 +1,15 @@
-hostname: default.com
+hostname: "default.com"           # Your server's name on rednet
+
+defaultTimeoutSeconds: 0.25       # Max runtime for a dynamic page before it times out
+hookInstructionCount: 10000       # Instruction count between debug hooks for dynamic pages
+
+maxRequestsPerWindow: 6           # Maximum requests per client in the time window
+requestWindowSeconds: 10          # Time window in seconds for request limit
+maxMessageBytes: 32768            # Max size of a message in bytes (32 KB)
+
+schedulerTick: 0.1                # How often the server processes queued dynamic pages (seconds)
+maxConcurrentDynamic: 6           # Max dynamic pages running concurrently
+cleanupInterval: 30               # How often to clean up client request logs (seconds)
+
+cacheStaticPages: true            # Cache static pages in memory for faster responses
+logPrefix: "[theccwww] "          # Prefix for all server log messages
