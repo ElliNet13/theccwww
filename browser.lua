@@ -1,6 +1,9 @@
 -- Start modems
 peripheral.find("modem", rednet.open)
 
+-- Requirements
+local LibDeflate = require("libraries.CC-Archive.LibDeflate")
+
 local destination = ...
 if not destination then
     write("Enter the link to go to: ")
@@ -48,9 +51,13 @@ theccwww.fetch = function(url, options)
     end
     msg = msg .. "\r\n" .. body
 
-    rednet.send(serverLookup, msg, "theccwww")
+    rednet.send(serverLookup, LibDeflate:CompressDeflate(msg), "theccwww")
     local _, response = rednet.receive("theccwww", 5)
     if not response then error("No response from server", 2) end
+
+    response = LibDeflate:DecompressDeflate(response)
+
+    if not response then error("Invalid response from server", 2) end
 
     -- Parse status line
     local statusLine = response:match("^(.-)\r?\n")

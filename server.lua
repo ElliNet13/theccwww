@@ -2,6 +2,7 @@
 
 -- Requirements
 local tinyyaml = require("libraries.tinyyaml")
+local LibDeflate = require("libraries.CC-Archive.LibDeflate")
 
 -- Open the modem
 peripheral.find("modem", rednet.open)
@@ -130,7 +131,8 @@ local httpStatus = {
 local function serverLoop()
     while true do
         local id, message = rednet.receive("theccwww")
-        if not message or message == "" then message = "GET /index THECCWEB/1" end
+        message = LibDeflate:DecompressDeflate(message)
+        if not message or message == "" then print("Received invalid message") message = "GET /404 THECCWEB/1" end
 
         local method, page, params, headers, body = parseRequest(message)
         local responseType
@@ -209,7 +211,7 @@ local function serverLoop()
         end
 
         -- Send response
-        rednet.send(id, response, "theccwww")
+        rednet.send(id, LibDeflate:CompressDeflate(response), "theccwww")
         print(string.format("[DONE] Sent %s (%s) to %s with status %d", pathFound, responseType, id, statusCode))
     end
 end
