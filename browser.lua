@@ -3,26 +3,20 @@ peripheral.find("modem", rednet.open)
 
 local destination = ...
 if not destination then
-    print("Enter the link to go to: ")
+    write("Enter the link to go to: ")
     destination = read()
 end
 
--- Look up the destination
+-- Parse domain and path
 local domain, path = destination:match("^([^/]+)(/?.*)$")
-
 if not domain then
     print("Invalid link")
     return
 end
+if not path then path = "" end
 
-if not path then
-    path = ""
-end
-
--- Make theccwww
+-- Browser object
 local theccwww = {}
-
--- Set the link
 theccwww.link = {
     fulllink = destination,
     page = path,
@@ -30,105 +24,155 @@ theccwww.link = {
 }
 
 local server = nil
-local sandbox = {}
 
--- Goto a page
-function theccwww.gotopage(page)
-    print("Changing page to " .. (page or ("The homepage of" .. theccwww.link.domain)))
-    theccwww.link.page = page or ""
-    theccwww.link.fulllink = theccwww.link.domain .. "/" .. theccwww.link.page:gsub("^/", "")
+-- Fetch helper
+theccwww.fetch = function(url, options)
+    options = options or {}
+    local method = (options.method or "GET"):upper()
+    local headers = options.headers or {}
+    local body = options.body or ""
 
-    print("Sending message to " .. theccwww.link.domain)
-    local gotSent = rednet.send(server, page or "", "theccwww")
+    -- Parse domain/path
+    local domain, path = url:match("^([^/]+)(/?.*)$")
+    if not domain then error("Invalid URL: " .. tostring(url), 2) end
+    if path == "" or path == "/" or path == nil then path = "index" end
 
-    if not gotSent then
-        error("Failed to send message to " .. theccwww.link.domain)
+    -- Lookup server
+    local serverLookup = rednet.lookup("theccwww", domain)
+    if not serverLookup then error("No server found for domain " .. domain, 2) end
+
+    -- Build request
+    local msg = string.format("%s /%s THECCWEB/1\r\n", method, path)
+    for k,v in pairs(headers) do
+        msg = msg .. string.format("%s: %s\r\n", k, v)
+    end
+    msg = msg .. "\r\n" .. body
+
+    rednet.send(serverLookup, msg, "theccwww")
+    local _, response = rednet.receive("theccwww", 5)
+    if not response then error("No response from server", 2) end
+
+    -- Parse status line
+    local statusLine = response:match("^(.-)\r?\n")
+    local status = tonumber(statusLine:match("%d%d%d")) or 0
+
+    -- Parse headers
+    local respHeaders = {}
+    for k, v in response:gmatch("([%w-]+):%s*(.-)\r?\n") do
+        respHeaders[k:lower()] = v
     end
 
-    local id, message
-    local maxWait = 5         -- seconds
-    local elapsed = 0
+    -- Get body
+    local respBody = response:match("\r?\n\r?\n(.*)$") or ""
 
-    repeat
-        -- Wait 1 second each loop
-        id, message = rednet.receive("theccwww", 1)
+    -- Handle redirect automatically
+    if status == 302 and respHeaders["location"] then
+        return theccwww.fetch(domain .. respHeaders["location"], options)
+    end
 
-        elapsed = elapsed + 1
-        print("Loading page... will timeout in " .. (maxWait - elapsed) .. " seconds")
-
-        if elapsed >= maxWait then
-            error("Timeout: no response from server within " .. maxWait .. " seconds")
-        end
-    until id == server
-
-    term.clear()
-    term.setCursorPos(1, 1)
-    load(message, "Website", "t", sandbox)()
+    return {
+        status = status,
+        headers = respHeaders,
+        body = respBody
+    }
 end
 
--- Goto a site
-function theccwww.gotosite(site, page)
-    print("Changing site to " .. site)
+-- Sandbox environment for dynamic pages
+local sandbox = {
+    print = print,
+    error = error,
+    pairs = pairs,
+    ipairs = ipairs,
+    type = type,
+    tonumber = tonumber,
+    tostring = tostring,
+    math = math,
+    string = string,
+    table = table,
+    term = term,
+    colors = colors,
+    colours = colours,
+    os = {
+        clock = os.clock,
+        time = os.time,
+        date = os.date,
+        pullEvent = os.pullEvent,
+        sleep = os.sleep
+    },
+    read = read,
+    xpcall = xpcall,
+    pcall = pcall,
+    load = load,
+}
 
-    theccwww.link.domain = site
-    theccwww.link.fulllink = site .. "/" .. (page or "")
+-- Add browser helpers and current request info
+sandbox.theccwww = theccwww
+sandbox.request = {
+    method = "GET",
+    path = theccwww.link.page,
+    query = {},
+    headers = {},
+    body = "",
+}
 
-    print("Looking up server for " .. site)
-    -- Lookup server first
-    server = rednet.lookup("theccwww", site)
+-- Go to a page
+function theccwww.gotopage(page, method, body)
+    if page == "" or page == "/" or page == nil then page = "index" end
+    method = method or "GET"
+    theccwww.link.page = page
+    theccwww.link.fulllink = theccwww.link.domain .. "/" .. page:gsub("^/", "")
+
     if not server then
-        error("No server found for domain " .. site)
+        server = rednet.lookup("theccwww", theccwww.link.domain)
+        if not server then error("No server found for " .. theccwww.link.domain, 2) end
     end
 
-    print("Sending message to " .. server)
+    local response = theccwww.fetch(theccwww.link.domain .. "/" .. page, {method=method, body=body})
 
-    -- Send only the page path
-    local gotSent = rednet.send(server, page or "")
+    -- Update sandbox request info
+    sandbox.request.method = method
+    sandbox.request.path = page
+    sandbox.request.body = body
+    sandbox.request.headers = response.headers
 
-    if not gotSent then
-        error("Failed to send message to " .. site)
-    end
-
-    theccwww.gotopage(page or "")
-end
-
--- Function to prompt yes/no 
-function theccwww.promptYesNo(question)
-    while true do
-        write(question .. " (y/n): ")
-        local answer = read()
-        if answer then
-            answer = answer:lower()
-            if answer == "y" or answer == "yes" then
-                return true
-            elseif answer == "n" or answer == "no" then
-                return false
+    -- Handle response types
+    if response.headers["response-type"] == "File" then
+        -- Auto-download file
+        local filename = page:match("[^/]+$") or "downloaded_file"
+        local f = fs.open(filename, "w")
+        f.write(response.body)
+        f.close()
+        print("Downloaded file: " .. filename)
+    elseif response.headers["response-type"] == "Page" or response.headers["response-type"] == "Dynamic" then
+        -- Clear screen and execute dynamic/page content
+        term.clear()
+        term.setCursorPos(1,1)
+        if response.body ~= "" then
+            local fn, err = load(response.body, "Website", "t", sandbox)
+            if fn then
+                fn()
             else
-                print("Please enter 'y' or 'n'.")
+                print("Error loading page: " .. err)
             end
         end
+    else
+        print("Unknown response type: " .. tostring(response.headers["response-type"]))
+        print(response.body)
     end
 end
 
--- Get the contents of a file on a fileserver
-function theccwww.download(domain, path)
-    local fileserver = rednet.lookup("theccwww", domain)
-    if not fileserver then
-        error("No fileserver found for " .. domain)
-    end
-
-    -- Send a request to the server
-    local gotSent = rednet.send(fileserver, path, "theccwww", 5)
-
-    if not gotSent then
-        error("Failed to send message to " .. domain)
-    end
-
-    local id, message = rednet.receive("theccwww")
-    return message
+-- Go to a site
+function theccwww.gotosite(site, page)
+    theccwww.link.domain = site
+    theccwww.link.page = page or ""
+    theccwww.link.fulllink = site .. "/" .. theccwww.link.page
+    if not site then error("No site specified", 2) end
+    server = rednet.lookup("theccwww", site)
+    if not server then error("No server found for domain " .. site, 2) end
+    theccwww.gotopage(theccwww.link.page)
 end
 
--- Upload a file
+-- File access
 function theccwww.file(mode)
     print()
     print("The website requested to access a file")
@@ -141,80 +185,68 @@ function theccwww.file(mode)
 
     if theccwww.promptYesNo("Are you sure you want to use this file?") then
         print("Where is the file?")
-        local file = fs.open(read(), mode)
-        return file
+        return fs.open(read(), mode)
     else
         print("Upload canceled.")
         os.sleep(1)
         return nil
     end
+end
+
+-- Yes/no prompt
+function theccwww.promptYesNo(question)
+    while true do
+        write(question .. " (y/n): ")
+        local answer = read()
+        if answer then
+            answer = answer:lower()
+            if answer == "y" or answer == "yes" then return true
+            elseif answer == "n" or answer == "no" then return false
+            else print("Please enter 'y' or 'n'.") end
+        end
+    end
+end
+
+-- Require a file dynamically
+function theccwww.require(path, domain)
+    if not domain then domain = theccwww.link.domain end
+    if not path then error("No path specified", 2) end
+    local internalRequirePaths = { "cc." }
     
-end
-
--- Require a link
-function theccwww.require(domain, path)
-    local fileserver = rednet.lookup("theccwww", domain)
-    if not fileserver then
-        error("No fileserver found for " .. domain)
+    for _, v in pairs(internalRequirePaths) do
+        if path:sub(1, #v) == v then
+            return require(path)
+        end
     end
 
-    -- Send a request to the server
-    rednet.send(fileserver, path, "theccwww")
+    path = path:gsub("^/", "")
 
-    -- Wait for a response, but with a timeout to prevent hanging forever
-    local id, message = rednet.receive("theccwww", 5) -- 5-second timeout
-    if not message then
-        error("Timed out waiting for file from " .. domain .. "/" .. path)
+    local ok, response = pcall(theccwww.fetch, domain .. "/" .. path)
+    if not ok then
+        error("Require failed: " .. tostring(response), 2)
     end
 
-    -- Load the file in your sandbox
-    return load(message, "Website require", "t", sandbox)()
+    if response.status ~= 200 then
+        error("Require failed: " .. domain .. "/" .. path .. " returned " .. tostring(response.status), 2)
+    end
+
+    local fn, err = load(response.body, "Website require: " .. path, "t", sandbox)
+    if not fn then
+        error("Require failed to load: " .. tostring(err), 2)
+    end
+
+    local ok2, result = pcall(fn)
+    if not ok2 then
+        error("Require failed to run: " .. tostring(result), 2)
+    end
+
+    return result
 end
+
+sandbox.require = theccwww.require
 
 -- Speakers
 theccwww.speakers = { peripheral.find("speaker") }
 
--- Create a sandbox
-sandbox = {
-    print = print,
-    error = error,
-    pairs = pairs,
-    ipairs = ipairs,
-    type = type,
-    tonumber = tonumber,
-    tostring = tostring,
-    math = math,
-    string = string,
-    table = table,
-    server = server,
-    theccwww = theccwww,
-    term = term,
-    rednet = {
-        receive = rednet.receive,
-        send = rednet.send,
-        lookup = rednet.lookup
-    },
-    read = read,
-    os = {
-        clock = os.clock,
-        time = os.time,
-        date = os.date,
-        pullEvent = os.pullEvent,
-        sleep = os.sleep
-    },
-    xpcall = xpcall,
-    pcall = pcall,
-    require = function (path) -- A version for compatibility with built in require
-        if path:match("^cc%.") then
-            return require(path)
-        else
-            return theccwww.require(theccwww.link.domain, path)
-        end
-    end,
-    colors = colors,
-    colours = colours,
-    load = load,
-}
-
--- Go to the home page
+-- Start at home page
 theccwww.gotosite(theccwww.link.domain, theccwww.link.page)
