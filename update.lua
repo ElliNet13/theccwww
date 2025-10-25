@@ -20,7 +20,9 @@ local function normalizePath(path)
 end
 
 local programDir = normalizePath(fs.getDir(shell.getRunningProgram()))
-local CCArchive = programDir
+local libraries = normalizePath(fs.combine(programDir, "libraries"))
+local CCArchive = normalizePath(fs.combine(libraries, "CC-Archive"))
+
 print("[Updater] Starting HTTP update...")
 local tempDir = "/tmptheccwwwhttpupdate" .. math.random(10000, 99999)
 fs.makeDir(tempDir)

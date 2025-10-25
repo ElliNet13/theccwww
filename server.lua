@@ -1,7 +1,7 @@
 ---@diagnostic disable: duplicate-set-field
 
 -- Requirements
-local tinyyaml = require("tinyyaml")
+local tinyyaml = require("libraries.tinyyaml")
 
 -- Open the modem
 peripheral.find("modem", rednet.open)
