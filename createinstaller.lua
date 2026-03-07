@@ -24,20 +24,22 @@ fs.makeDir(fs.combine(destination, "files"))
 local prodFiles = {
     "browser.lua",
     "server.lua",
-    "tinyyaml.lua",
+    "libraries/tinyyaml.lua",
     "server.default.yaml",
     "404.default.lua",
     "index.default.lua",
     "globals.lua",
     "update.lua",
-    "tar.lua",
-    "LibDeflate.lua"
+    "libraries/CC-Archive/tar.lua",
+    "libraries/CC-Archive/LibDeflate.lua"
 }
 
 for _, file in ipairs(prodFiles) do
     fs.copy(fs.combine(fs.getDir(shell.getRunningProgram()), file), fs.combine(fs.combine(destination, "files"), file))
 end
 
-fs.copy(fs.getDir(shell.getRunningProgram()) .. "/setup.lua", destination.."/setup.lua")
+fs.copy(fs.getDir(shell.getRunningProgram()) .. "/setup.lua", destination .. "/setup.lua")
+
+disk.setDiskLabel("The Computercraft World Wide Web Install Disk")
 
 print("Disk created!")
